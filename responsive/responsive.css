@@ -1,0 +1,36 @@
+/* Widest: 1200px and up */
+@media screen and (min-width: 1200px) {
+    .homer {
+        width: 312px;
+        height: 312px;
+        background: url(homer.jpg) 0px 0px;
+    }
+}
+
+/* Wide: 800px and up */
+@media screen and (min-width: 800px) and (max-width: 1199px) {
+    .homer {
+        width: 312px;
+        height: 312px;
+        background: url(homer.jpg) 313px 0px;
+    }
+}
+
+/* Narrow: 400px and up */
+@media screen and (min-width: 400px) and (max-width: 799px) {
+    .homer {
+        width: 312px;
+        height: 312px;
+        background: url(homer.jpg) 0px -313px;
+    }
+}
+
+/* Narrowest: 0px and up */
+@media screen and (min-width: 0px) and (max-width: 399px) {
+    .homer {
+        width: 312px;
+        height: 312px;
+        background: url(homer.jpg) 313px -313px;
+    }
+}
+
