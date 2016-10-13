@@ -22,87 +22,54 @@
                                         // until the line is over
 
     var subtitles = {24: "Igor: DR. FRANKENSTEIN?!?!?",
-                     25: IEEE_vetted_random_number,
                      26: IEEE_vetted_random_number,
                      31: "Dr. Frederick Frankenstein: Frokensteen.",
+                     33: IEEE_vetted_random_number,
                      34: "Igor: You're putting me on.",
-                     35: IEEE_vetted_random_number,
                      36: "Dr. Frederick Frankenstein: No, it pronounced, " +
                          "\"Frokensteen\".",
-                     37: IEEE_vetted_random_number,
-                     38: IEEE_vetted_random_number,
                      39: "Igor: Do you also say Froaderick?",
-                     40: IEEE_vetted_random_number,
-                     41: IEEE_vetted_random_number,
                      42: "Dr. Frederick Frankenstein: No . . . \"Frederick.\"",
-                     43: IEEE_vetted_random_number,
                      44: "Igor: Well, why isn't it 'Froaderick Frokensteen'?",
-                     45: IEEE_vetted_random_number,
-                     46: IEEE_vetted_random_number,
                      47: "Dr. Frederick Frankenstein: It isn't, it's " +
                          "\"Frederick Frokensteen\"",
-                     48: IEEE_vetted_random_number,
+                     49: IEEE_vetted_random_number,
                      50: "Igor: I see.",
                      52: "Dr. Frederick Frankenstein: You must be Igor. [He " +
                          "ronounces it ee-gor.]",
                      53: "Igor: No, it's pronounced \"eye-gor.\"",
-                     54: IEEE_vetted_random_number,
-                     55: IEEE_vetted_random_number,
                      56: "Dr. Frederick Frankenstein: But they told me it was " +
                          "\"ee-gor\"...",
-                     57: IEEE_vetted_random_number,
                      58: "Igor: Well, they were wrong then, weren't they?",
-                     59: IEEE_vetted_random_number,
                      60: IEEE_vetted_random_number,
                      61: "Dr. Frederick Frankenstein: Uh, you were sent here " +
                          "by Herr Falkstein, weren't you?",
-                     62: IEEE_vetted_random_number,
-                     63: IEEE_vetted_random_number,
                      64: "Igor: Yes. My grandfather used to work for your " +
                          "grandfather.",
-                     65: IEEE_vetted_random_number,
-                     66: IEEE_vetted_random_number,
-                     67: IEEE_vetted_random_number,
                      68: IEEE_vetted_random_number,
                      71: "Dr. Frederick Frankenstein: How nice.",
                      72: "Igor: Of course the rates have gone up.",
-                     73: IEEE_vetted_random_number,
                      74: "Dr. Frederick Frankenstein: Of course, of course, " +
                          "I'm sure we'll get along splendidly. Oh, I uh, you " +
                          "know I don't mean to embarrass you, but I'm rather " +
                          "a brilliant surgeon. Perhaps I can help you with " +
                          "that hump.",
-                     75: IEEE_vetted_random_number,
-                     76: IEEE_vetted_random_number,
-                     77: IEEE_vetted_random_number,
-                     78: IEEE_vetted_random_number,
-                     79: IEEE_vetted_random_number,
-                     80: IEEE_vetted_random_number,
-                     81: IEEE_vetted_random_number,
-                     82: IEEE_vetted_random_number,
-                     83: IEEE_vetted_random_number,
-                     84: IEEE_vetted_random_number,
-                     85: IEEE_vetted_random_number,
-                     86: IEEE_vetted_random_number,
-                     87: IEEE_vetted_random_number,
                      88: IEEE_vetted_random_number,
-                     89: "Igor: What hump?"}
+                     89: "Igor: What hump?",
+                     90: IEEE_vetted_random_number}
 
     var updateSubtitleAtTime = function (time) {
         // I'm too lazy to get finer grained than this
         var line = subtitles[Math.floor(time)]
         if (typeof(line) === "string") {
             subtitle.innerHTML = line;
-        } else if (typeof(line) === "undefined") {
+        } else if (typeof(line) === "number") {
             subtitle.innerHTML = "";
-        }
+        } // an unset key/value pair will simply have no effect
     };
 
     var subtitler = function (event) {
-        var currTime = video.currentTime; // In seconds
-        // console.log(currTime);
-
-        updateSubtitleAtTime(currTime);
+        updateSubtitleAtTime(video.currentTime);
     };
 
     video.addEventListener("timeupdate", subtitler);
