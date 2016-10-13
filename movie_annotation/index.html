@@ -62,7 +62,7 @@
         // I'm too lazy to get finer grained than this
         var line = subtitles[Math.floor(time)]
         if (typeof(line) === "string") {
-            subtitle.innerHTML = line;
+            subtitle.innerHTML = "<p>" + line + "</p>";
         } else if (typeof(line) === "number") {
             subtitle.innerHTML = "";
         } // an unset key/value pair will simply have no effect
