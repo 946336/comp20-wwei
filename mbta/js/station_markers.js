@@ -127,10 +127,14 @@ for (var key in stations) {
     }
 }
 
-// Stub out trainsTo
-for (var i = 0; i < s_names.length; ++i) {
-    timeUntil[s_names[i]] = [];
+function stubTimeUntil () {
+    // Stub out trainsTo
+    for (var i = 0; i < s_names.length; ++i) {
+        timeUntil[s_names[i]] = [];
+    }
 }
+
+stubTimeUntil();
 
 var path_1 = [
     stations["Alewife"],

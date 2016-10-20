@@ -13,6 +13,10 @@ var closest_station = {
 // Trains split by destination
 var timeUntil = {};
 
+// Since I'd like to count down every five seconds or so...
+var date = new Date()
+var timeAtRq;
+
 // Change this to a path type thing if time permits
 var pathToStation = new google.maps.Polyline({
     path: [new google.maps.LatLng()],
@@ -68,6 +72,7 @@ function useMBTAData() {
     rq.onerror = useMBTAData;
     rq.onloadend = tryAgainIf404;
 
+    timeAtRq = date.getTime();
     rq.send();
 }
 
@@ -82,7 +87,17 @@ function tryAgainIf404() {
     }
 }
 
+window.setInterval(function () {
+    // console.log("5 seconds have passed");
+    showTrainData();
+}, 5000);
+
+window.setInterval(function () {
+    useMBTAData();
+}, 60000);
+
 function splitTrainsByPath() {
+    stubTimeUntil();
     // console.log(redLine);
     var whereTo;
     for (var i = 0; i < redLine.length; ++i) {
@@ -127,9 +142,12 @@ function buildTimeString(name) {
                     , "<ul>"];
     var times = timeUntil[name];
 
+    var timeSinceRq = new Date().getTime();
+
     for (var i = 0; i < times.length; ++i) {
+        var secondsSince = ((timeSinceRq - timeAtRq) / 1000);
         // The times are in seconds, but we'd like minutes
-        var minutes = (times[i] / 60).toFixed(1)
+        var minutes = (((times[i] - secondsSince) / 60)).toFixed(1);
         timeString.push("<li>" 
                       + ((minutes <= 0) ? "At platform" : minutes + " min")
                       + "</li>");
@@ -241,6 +259,7 @@ function setInfoFun (name, f) {
                                   function () { f(name); });
 }
 
+// Consider navigator.geolocation.watchPosition instead!
 function findMe() {
     // console.log("Locating self...");
     if (navigator.geolocation) {
