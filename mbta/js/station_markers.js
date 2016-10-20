@@ -114,7 +114,7 @@ var LatLng = google.maps.LatLng;
         title: "Central Square",
     }),
     "Braintree": new Marker({
-        position: new LatLng(42.2078543,        -71.0011385),
+        position: new LatLng(42.2078543, -71.0011385),
         title: "Braintree",
     }),
 };
@@ -128,46 +128,50 @@ for (var key in stations) {
 }
 
 var path_1 = [
-    stations["Alewife"].getPosition(),
-    stations["Davis"].getPosition(),
-    stations["Porter Square"].getPosition(),
-    stations["Harvard Square"].getPosition(),
-    stations["Central Square"].getPosition(),
-    stations["Kendall/MIT"].getPosition(),
-    stations["Charles/MGH"].getPosition(),
-    stations["Park Street"].getPosition(),
-    stations["Downtown Crossing"].getPosition(),
-    stations["South"].getPosition(),
-    stations["Broadway"].getPosition(),
-    stations["Andrew"].getPosition(),
-    stations["JFK/UMass"].getPosition(),
-    stations["North Quincy"].getPosition(),
-    stations["Wollaston"].getPosition(),
-    stations["Quincy Center"].getPosition(),
-    stations["Quincy Adams"].getPosition(),
-    stations["Braintree"].getPosition(),
+    stations["Alewife"],
+    stations["Davis"],
+    stations["Porter Square"],
+    stations["Harvard Square"],
+    stations["Central Square"],
+    stations["Kendall/MIT"],
+    stations["Charles/MGH"],
+    stations["Park Street"],
+    stations["Downtown Crossing"],
+    stations["South"],
+    stations["Broadway"],
+    stations["Andrew"],
+    stations["JFK/UMass"],
+    stations["North Quincy"],
+    stations["Wollaston"],
+    stations["Quincy Center"],
+    stations["Quincy Adams"],
+    stations["Braintree"],
 ];
 
 var path_2 = [
-    stations["JFK/UMass"].getPosition(),
-    stations["Savin Hill"].getPosition(),
-    stations["Fields Corner"].getPosition(),
-    stations["Shawmut"].getPosition(),
-    stations["Ashmont"].getPosition(),
+    stations["JFK/UMass"],
+    stations["Savin Hill"],
+    stations["Fields Corner"],
+    stations["Shawmut"],
+    stations["Ashmont"],
 ];
 
 var longPath = new google.maps.Polyline({
-    path: path_1,
+    path: path_1.map(function (item, i, arr) {
+        return item.getPosition();
+    }),
     geodesic: true,
     strokeColor: "#FF0000",
-    strokeOpacity: 1.0,
+    strokeOpacity: 0.5,
     strokeWeight: 2,
 });
 
 var shortPath = new google.maps.Polyline({
-    path: path_2,
+    path: path_2.map(function (item, i, arr) {
+        return item.getPosition();
+    }),
     geodesic: true,
     strokeColor: "#FF0000",
-    strokeOpacity: 1.0,
+    strokeOpacity: 0.5,
     strokeWeight: 2,
 });

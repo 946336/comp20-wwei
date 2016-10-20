@@ -5,6 +5,20 @@ var whereami = new google.maps.LatLng(latitude, longitude);
 // Mark myself
 var marker;
 
+var closest_station = {
+    distance: 0,
+    name: "None",
+};
+
+// Change this to a path type thing if time permits
+var pathToStation = new google.maps.Polyline({
+    path: [new google.maps.LatLng()],
+    geodesic: true,
+    strokeColor: "#00FF00",
+    strokeOpacity: 1.0,
+    strokeWeight: 2,
+});
+
 var map_options = {
     mapTypeId: google.maps.MapTypeId.ROADMAP,
     zoom: 13, // This actually isn't readable by the maps API and needs to be
@@ -25,8 +39,6 @@ function init() {
     map = new google.maps.Map(document.getElementById("map", map_options));
     findMe();
 
-    console.log("In init, after finding self: ", whereami.lat(), whereami.lng());
-
     for (var i = 0; i < s_names.length; ++i) {
         stations[s_names[i]].setMap(map);
         stations[s_names[i]].setIcon("img/T.png");
@@ -41,8 +53,14 @@ function init() {
 
 // From http://stackoverflow.com/a/1669222
 
-Array.prototype.min = function() {
-    return Math.min.apply(null, this);
+Array.prototype.min = function(getComparableField) {
+    if (typeof(getComparableField) === "undefined") {
+        return Math.min.apply(null, this);
+    } else {
+        return Math.min.apply(null, this.map(function (thing, i, arr) {
+            return getComparableField(thing);
+        }));
+    }
 }
 
 // From http://stackoverflow.com/a/14561433
@@ -74,20 +92,40 @@ function toRad(x) {
 function findClosestStation() {
     // This is in meters
     var dst = path_1.map(function(pos, i, arr) {
-        return google.maps.geometry.spherical.computeDistanceBetween(pos, whereami);
+        return {
+            distance: google.maps.geometry.spherical.computeDistanceBetween(pos.getPosition(), whereami),
+            name: arr[i].getTitle(),
+        };
     });
 
-    // This is in kilometers
-    var dst_ = path_1.map(function(pos, i, arr) {
-        return haversineDst(pos, whereami);
+    var s_dst = dst.sort(function (lhs, rhs) {
+        return lhs.distance - rhs.distance;
     });
 
-    // console.log("When finding closest station: ", whereami.lat(), whereami.lng());
-    // console.log(path_1[0].lat(), path_1[0].lng());
-    console.log(dst);
-    console.log(dst_);
-    console.log(dst.min());
-    console.log(dst_.min());
+    closest_station = s_dst[0];
+}
+
+function showClosestStation() {
+    // Set self marker to name closest station
+    google.maps.event.addListener(marker, 'click', function () {
+        infoWindow.setContent("Closest Red Line station: "
+                              + closest_station.name
+                              + " ("
+                              + (closest_station.distance / 1000).toFixed(2)
+                              + " km)");
+    });
+
+    // Draw the line
+    // Change this to a path if time permits
+    pathToStation = new google.maps.Polyline({
+        path:  [whereami,
+                stations[closest_station.name].getPosition()],
+        geodesic: true,
+        strokeColor: "#00FF00",
+        strokeOpacity: 0.5,
+        strokeWeight: 2,
+    });
+    pathToStation.setMap(map);
 }
 
 // Shenanigans! Closures created in loops are references to the same closure!
@@ -106,6 +144,7 @@ function findMe() {
             longitude = position.coords.longitude;
             renderMap();
             findClosestStation();
+            showClosestStation();
         });
     } else {
         console.log("Geolocation not supported, sorry!");
