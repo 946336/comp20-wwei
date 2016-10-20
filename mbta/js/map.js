@@ -129,7 +129,10 @@ function buildTimeString(name) {
 
     for (var i = 0; i < times.length; ++i) {
         // The times are in seconds, but we'd like minutes
-        timeString.push("<li>" + (times[i] / 60).toFixed(1) + " min</li>");
+        var minutes = (times[i] / 60).toFixed(1)
+        timeString.push("<li>" 
+                      + ((minutes <= 0) ? "At platform" : minutes + " min")
+                      + "</li>");
     }
     timeString.push("</ul>");
     return timeString.join("");
