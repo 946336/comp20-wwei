@@ -83,7 +83,7 @@ function tryAgainIf404() {
 }
 
 function splitTrainsByPath() {
-    console.log(redLine);
+    // console.log(redLine);
     var whereTo;
     for (var i = 0; i < redLine.length; ++i) {
         // 5 predictions per train, under redLine[i]
@@ -100,7 +100,7 @@ function splitTrainsByPath() {
         timeUntil[s_names[i]].sort(function (lhs, rhs) { return lhs - rhs; });
     }
 
-    console.log(timeUntil);
+    // console.log(timeUntil);
 }
 
 // This just does the Red Line for now. If it needs to do more, add here or
@@ -108,12 +108,31 @@ function splitTrainsByPath() {
 function showTrainData() {
     splitTrainsByPath();
 
+    var content = "";
+
     for (var i = 0; i < s_names.length; ++i) {
+        content = "";
         setInfoFun(s_names[i], function (name) {
-            infoWindow.setContent(stations[name].title);
+            content = buildTimeString(name);
+
+            infoWindow.setContent(content);
             infoWindow.open(map, stations[name]);
         });
     }
+}
+
+function buildTimeString(name) {
+    var timeString = ["<h4>" + name + "</h4>"
+                    , "<p>Next trains in:</p>"
+                    , "<ul>"];
+    var times = timeUntil[name];
+
+    for (var i = 0; i < times.length; ++i) {
+        // The times are in seconds, but we'd like minutes
+        timeString.push("<li>" + (times[i] / 60).toFixed(1) + " min</li>");
+    }
+    timeString.push("</ul>");
+    return timeString.join("");
 }
 
 // From http://stackoverflow.com/a/1669222
