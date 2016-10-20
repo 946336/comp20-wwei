@@ -29,9 +29,9 @@ var LatLng = google.maps.LatLng;
 //  Yes, the layout is repetitive with the station name appearing three times
 // total each. Bite me.
  var stations = {
-    "South": new Marker({
+    "South Station": new Marker({
         position: new LatLng(42.352271, -71.05524200000001),
-        title: "South",
+        title: "South Station",
     }),
     "Andrew": new Marker({
         position: new LatLng(42.330154, -71.057655),
@@ -127,6 +127,11 @@ for (var key in stations) {
     }
 }
 
+// Stub out trainsTo
+for (var i = 0; i < s_names.length; ++i) {
+    timeUntil[s_names[i]] = [];
+}
+
 var path_1 = [
     stations["Alewife"],
     stations["Davis"],
@@ -137,7 +142,7 @@ var path_1 = [
     stations["Charles/MGH"],
     stations["Park Street"],
     stations["Downtown Crossing"],
-    stations["South"],
+    stations["South Station"],
     stations["Broadway"],
     stations["Andrew"],
     stations["JFK/UMass"],

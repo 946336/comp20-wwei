@@ -10,6 +10,9 @@ var closest_station = {
     name: "None",
 };
 
+// Trains split by destination
+var timeUntil = {};
+
 // Change this to a path type thing if time permits
 var pathToStation = new google.maps.Polyline({
     path: [new google.maps.LatLng()],
@@ -32,6 +35,10 @@ var map;
 // Let's display some words
 var infoWindow = new google.maps.InfoWindow();
 
+var rq = new XMLHttpRequest();
+var json;
+var redLine;
+
 // Since JS automatically hoists up all function declarations, we can just put
 // our functions wherever
 
@@ -49,6 +56,64 @@ function init() {
     longPath.setMap(map);
     shortPath.setMap(map);
 
+    useMBTAData();
+}
+
+function useMBTAData() {
+    rq = new XMLHttpRequest();
+    rq.open("GET", "https://rocky-taiga-26352.herokuapp.com/redline.json");
+
+    // A 404 is not an http error, so this never gets called unless a network
+    // occurs
+    rq.onerror = useMBTAData;
+    rq.onloadend = tryAgainIf404;
+
+    rq.send();
+}
+
+function tryAgainIf404() {
+    if (rq.status == 200) {
+        json = JSON.parse(rq.responseText);
+        redLine = json["TripList"]["Trips"];
+        showTrainData();
+    } else {
+        // Try again :(
+        useMBTAData();
+    }
+}
+
+function splitTrainsByPath() {
+    console.log(redLine);
+    var whereTo;
+    for (var i = 0; i < redLine.length; ++i) {
+        // 5 predictions per train, under redLine[i]
+        goingThrough = redLine[i]["Predictions"];
+        if (typeof(goingThrough) === "undefined") continue;
+        for (var j = 0; j < goingThrough.length; ++j) {
+            timeUntil[goingThrough[j]["Stop"]].push(goingThrough[j]["Seconds"]);
+        }
+        // console.log(goingThrough);
+    }
+
+    // Sort times per station
+    for (var i = 0; i < s_names.length; ++i) {
+        timeUntil[s_names[i]].sort(function (lhs, rhs) { return lhs - rhs; });
+    }
+
+    console.log(timeUntil);
+}
+
+// This just does the Red Line for now. If it needs to do more, add here or
+// refactor
+function showTrainData() {
+    splitTrainsByPath();
+
+    for (var i = 0; i < s_names.length; ++i) {
+        setInfoFun(s_names[i], function (name) {
+            infoWindow.setContent(stations[name].title);
+            infoWindow.open(map, stations[name]);
+        });
+    }
 }
 
 // From http://stackoverflow.com/a/1669222
@@ -98,11 +163,25 @@ function findClosestStation() {
         };
     });
 
+    var dst2 = path_2.map(function(pos, i, arr) {
+        return {
+            distance: google.maps.geometry.spherical.computeDistanceBetween(pos.getPosition(), whereami),
+            name: arr[i].getTitle(),
+        };
+    });
+
     var s_dst = dst.sort(function (lhs, rhs) {
         return lhs.distance - rhs.distance;
     });
 
-    closest_station = s_dst[0];
+    var s_dst2 = dst2.sort(function (lhs, rhs) {
+        return lhs.distance - rhs.distance;
+    });
+
+    if (s_dst[0].distance < s_dst2[0].distance) closest_station = dst[0];
+    else closest_station = dst2[0];
+
+    showClosestStation();
 }
 
 function showClosestStation() {
@@ -129,11 +208,15 @@ function showClosestStation() {
 }
 
 // Shenanigans! Closures created in loops are references to the same closure!
-function setInfoFun (name) {
-    google.maps.event.addListener(stations[name], 'click', function () {
-        infoWindow.setContent(stations[name].title);
-        infoWindow.open(map, stations[name]);
-    });
+function setInfoFun (name, f) {
+    if (!(f instanceof Function)) {
+        return setInfoFun(name, function (name) {
+            infoWindow.setContent(stations[name].title);
+            infoWindow.open(map, stations[name]);
+        });
+    }
+    google.maps.event.addListener(stations[name], 'click',
+                                  function () { f(name); });
 }
 
 function findMe() {
@@ -144,7 +227,7 @@ function findMe() {
             longitude = position.coords.longitude;
             renderMap();
             findClosestStation();
-            showClosestStation();
+
         });
     } else {
         console.log("Geolocation not supported, sorry!");
