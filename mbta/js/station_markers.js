@@ -1,4 +1,4 @@
-//      stop_name     |  stop_lat   |      stop_lon      
+//      stop_name     |  stop_lat   |      stop_lon
 // -------------------+-------------+--------------------
 //  South Station     |   42.352271 | -71.05524200000001
 //  Andrew            |   42.330154 |         -71.057655
@@ -48,7 +48,7 @@ var LatLng = google.maps.LatLng;
     "JFK/UMass": new Marker({
         position: new LatLng(42.320685, -71.052391),
         title: "JFK/UMass",
-    }), 
+    }),
     "Savin Hill": new Marker ({
         position: new LatLng(42.31129, -71.053331),
         title: "Savin Hill",
