@@ -4,6 +4,8 @@ var longitude = 0;
 var whereami = new google.maps.LatLng(latitude, longitude);
 // Mark myself
 var marker;
+// Which marker has an open infoWindow on it?
+var openWindow;
 
 var closest_station = {
     distance: 0,
@@ -60,6 +62,11 @@ function init() {
     longPath.setMap(map);
     shortPath.setMap(map);
 
+    google.maps.event.addListener(infoWindow, 'closeclick',
+                                  function () {
+                                    openWindow = "AbsolutelyNotAStation";
+                                });
+
     useMBTAData();
 }
 
@@ -88,7 +95,6 @@ function tryAgainIf404() {
 }
 
 window.setInterval(function () {
-    // console.log("5 seconds have passed");
     showTrainData();
 }, 5000);
 
@@ -98,7 +104,6 @@ window.setInterval(function () {
 
 function splitTrainsByPath() {
     stubTimeUntil();
-    // console.log(redLine);
     var whereTo;
     for (var i = 0; i < redLine.length; ++i) {
         // 5 predictions per train, under redLine[i]
@@ -107,15 +112,12 @@ function splitTrainsByPath() {
         for (var j = 0; j < goingThrough.length; ++j) {
             timeUntil[goingThrough[j]["Stop"]].push(goingThrough[j]["Seconds"]);
         }
-        // console.log(goingThrough);
     }
 
     // Sort times per station
     for (var i = 0; i < s_names.length; ++i) {
         timeUntil[s_names[i]].sort(function (lhs, rhs) { return lhs - rhs; });
     }
-
-    // console.log(timeUntil);
 }
 
 // This just does the Red Line for now. If it needs to do more, add here or
@@ -134,6 +136,11 @@ function showTrainData() {
             infoWindow.open(map, stations[name]);
         });
     }
+
+    if (s_names.indexOf(openWindow) !== -1) {
+        // Dummy event, just need to trigger the event
+        google.maps.event.trigger(stations[openWindow], 'click', {});
+    }
 }
 
 function buildTimeString(name) {
@@ -146,10 +153,17 @@ function buildTimeString(name) {
 
     for (var i = 0; i < times.length; ++i) {
         var secondsSince = ((timeSinceRq - timeAtRq) / 1000);
+
+        var seconds = (times[i] - secondsSince).toFixed(0);
         // The times are in seconds, but we'd like minutes
-        var minutes = (((times[i] - secondsSince) / 60)).toFixed(1);
+        var minutes = (seconds / 60).toFixed(1);
+        var time = ((seconds < 60) ? (seconds + " sec") : (minutes + " min"));
+
+        var arrivedString = ((minutes <= 0 && -0.5 <= minutes) ?
+            "Arrived" : "Departed");
+
         timeString.push("<li>" 
-                      + ((minutes <= 0) ? "At platform" : minutes + " min")
+                      + ((minutes <= 0) ? arrivedString : time)
                       + "</li>");
     }
     timeString.push("</ul>");
@@ -250,18 +264,20 @@ function showClosestStation() {
 // Shenanigans! Closures created in loops are references to the same closure!
 function setInfoFun (name, f) {
     if (!(f instanceof Function)) {
-        return setInfoFun(name, function (name) {
+        var f = function (name) {
             infoWindow.setContent(stations[name].title);
             infoWindow.open(map, stations[name]);
-        });
+        };
     }
     google.maps.event.addListener(stations[name], 'click',
-                                  function () { f(name); });
+                                  function () {
+                                    f(name);
+                                    openWindow = name;
+                                });
 }
 
 // Consider navigator.geolocation.watchPosition instead!
 function findMe() {
-    // console.log("Locating self...");
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function (position) {
             latitude = position.coords.latitude;
@@ -277,9 +293,8 @@ function findMe() {
 
 function renderMap() {
     whereami = new google.maps.LatLng(latitude, longitude);
-    // console.log("After finding myself: ", whereami.lat(), whereami.lng());
 
-    map.setZoom(13); // Setting this via map_options always fails
+    map.setZoom(13); // Setting zoom via map_options always fails. ಠ_ಠ
 
     map.panTo(whereami);
     marker = new google.maps.Marker({
