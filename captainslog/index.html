@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Captain's Log</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <meta charset="utf-8"/>
+    <script>
+        $(document).ready(function () {
+            $("#msg").keydown(function(event) {
+                // Why is it 13?
+                if (event.keycode === 13 || event.which === 13) {
+
+                    var logs = localStorage.getItem("thisIsALog") || "";
+                    logs = "<p>"
+                         + new Date().toUTCString()
+                         + " - "
+                         + $("#msg").val()
+                         + "<p>\n"
+                         + logs;
+                    localStorage.setItem("thisIsALog", logs);
+
+                    $("#log").html(logs);
+                }
+            });
+
+            // Uncomment the line below and reload to clear the logs
+            // localStorage.removeItem("thisIsALog");
+            $("#log").html(localStorage.getItem("thisIsALog"));
+        });
+    </script>
+</head>
+
+<body>
+    <h1>Captain's Log</h1>
+    <h3>New entry: <input type="text" id="msg" name="msg" size="30" /></h3>
+    <div id="log"></div>
+</body>
+</html>
