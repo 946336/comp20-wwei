@@ -72,7 +72,7 @@ function init() {
 
 function useMBTAData() {
     rq = new XMLHttpRequest();
-    rq.open("GET", "https://rocky-taiga-26352.herokuapp.com/redline.json");
+    rq.open("GET", "https://dry-dawn-67469.herokuapp.com/redline.json");
 
     // A 404 is not an http error, so this never gets called unless a network
     // occurs
@@ -162,7 +162,7 @@ function buildTimeString(name) {
         var arrivedString = ((minutes <= 0 && -0.5 <= minutes) ?
             "Arrived" : "Departed");
 
-        timeString.push("<li>" 
+        timeString.push("<li>"
                       + ((minutes <= 0) ? arrivedString : time)
                       + "</li>");
     }
@@ -195,7 +195,7 @@ function haversineDst(a, b) {
     var dLat = toRad(x1);
     var x2 = lon2 - lon1;
     var dLon = toRad(x2);
-    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + 
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
                     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
                     Math.sin(dLon / 2) * Math.sin(dLon / 2);
     var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
