@@ -118,6 +118,7 @@ function splitTrainsByPath() {
     for (var i = 0; i < s_names.length; ++i) {
         timeUntil[s_names[i]].sort(function (lhs, rhs) { return lhs - rhs; });
     }
+
 }
 
 // This just does the Red Line for now. If it needs to do more, add here or
