@@ -167,6 +167,11 @@ function buildTimeString(name) {
                       + ((minutes <= 0) ? arrivedString : time)
                       + "</li>");
     }
+
+    if (times.length === 0) {
+        timeString.push("No nearby trains");
+    }
+
     timeString.push("</ul>");
     return timeString.join("");
 }
