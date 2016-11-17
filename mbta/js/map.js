@@ -65,7 +65,7 @@ function init() {
     google.maps.event.addListener(infoWindow, 'closeclick',
                                   function () {
                                     openWindow = "AbsolutelyNotAStation";
-                                });
+                                  });
 
     useMBTAData();
 }
