@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+uri='https://radiant-lake-20317.herokuapp.com/submit.json'
+# uri='localhost:5000/submit.json'
+
+# username='<script>window.alert("AAAAAAHHHHHHHHHHHHH");</script>'
+# grid="{whoIsThis: ${0}}"
+# score='4'
+
+# username='<script>window.alert("AAAAAAHHHHHHHHHHHHH");</script>'
+# grid="{whoIsThis: ${0}}"
+# score='4'
+
+curl --data "username=${username}" \
+     --data "score=${score}" \
+     --data "grid=${grid}" \
+     "${uri}"

@@ -1,0 +1,68 @@
+/* Styling for security report */
+
+body {
+    width: 80%;
+    margin-left: 10%;
+    color: #242424;
+    background: #E5E5E5;
+    font-size: 12pt;
+}
+
+.route {
+    font-family: "Lucida Console", Monaco, monospace;
+    font-size: 9pt;
+    background: #F4F4E3;
+}
+
+.query_string {
+    font-family: "Lucida Console", Monaco, monospace;
+    font-size: 9pt;
+    background: #F4F4E3;
+}
+
+.applicationURI {
+    font-family: "Lucida Console", Monaco, monospace;
+    font-size: 9pt;
+    background: #F4F4E3;
+}
+
+.code {
+    font-family: "Lucida Console", Monaco, monospace;
+    font-size: 9pt;
+    background: #F4F4E3;
+}
+
+.emphasis {
+    font-style: italic;
+}
+
+.screencap {
+    width: 720px;
+    height: auto;
+}
+
+#page_heading {
+    text-align: center;
+    padding-bottom: 0em;
+    margin-bottom: 0.3em;
+
+}
+
+ul.issue_sections{
+    list-style: none;
+    list-style-type: none;
+    padding: 0em;
+    margin: 0em;
+}
+
+ul .issue {
+    font-weight: bold;
+}
+
+hr.separator {
+    margin-top: 0em;
+    padding-top: 0em;
+    border: 0;
+    height: 1px;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+}

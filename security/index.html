@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='utf-8' lang='en-US'/>
+    <link rel='stylesheet' type='text/css' href='styles/basic.css'/>
+    <title>Report</title>
+</head>
+<body>
+    <h1 id='page_heading'>
+        Almost a useful security report
+    </h1>
+
+    <hr class='separator'/>
+
+    <h2>
+        <a id='intro'>Introduction</a>
+    </h2>
+    <p>
+        We are making a preliminary pass at the 2048 Highscore Center
+        application <span class='applicationURI'>radiant-lake-20317</span> with
+        the goal of finding flaws of any and all types, with an emphasis on
+        security.
+    </p>
+
+    <p>
+    <span class='applicationURI'>radiant-lake-20317</span> is an application
+    that stores scores from the popular game 2048. Scores are primarily
+    associated with a username and a time, though additionally the final state
+    of the grid is available upon request.
+    </p>
+
+    <p>
+        Scores are submitted through the <span class='route'>POST
+        /submit.json</span> route, with a score, a username, and a grid
+        attached to the request as data.
+    </p>
+
+    <p>
+        Detailed information may be requested in JSON format from the <span
+        class='route'>GET /scores.json</span> route, provided that a
+        username is provided as a query string (<span
+            class='query_string'>?username=...</span>). All entries associated
+        with that username are then returned as JSON. A failure returns an empty
+        list and a failure status code.
+
+        An overview of all scores tracked is accessible at the <span
+            class='route'>GET /</span> route.
+    </p>
+
+    <h2>
+        <a id='methods'>Methodology</a>
+    </h2>
+    <p>
+        We first check for the obvious vulnerability: a username that is
+        actually a payload that causes arbitrary javascript to execute when the
+        leaderboard is shown. Since it looks like usernames are being displayed
+        exactly as they are entered, we suspect that little to no sanitiation
+        is being done.
+    </p>
+
+    <p>
+        We then notice that the <span class='route'>GET /scores.json</span>
+        route looks as if it is nothing more than a thin wrapper around a
+        database call, so we attempt a database injection attack to see whether
+        our query strings are sanitized before being passed along.
+    </p>
+
+    <p>
+        We throw junk at <span class='route'>POST /submit.json</span> and <span
+            class='route'>GET /scores.json</span> to see what kind of
+        delightfully strange things happen.
+    </p>
+
+    <h2>
+        <a id='findings'>Abstract of Findings</a>
+    </h2>
+    <ul>
+        <li>
+            People can put their own content on the webpage. In fact, people
+            could have an internet war over whose stuff shows up on the webpage.
+        </li>
+        <li>
+            People can easily retrieve other people's scores. In fact, they can
+            easily retrieve everyone else's scores
+            <span class='emphasis'>without </span> knowing their usernames.
+        </li>
+        <li>
+            The web application does not differentiate between junk input and
+            valid input.
+        </li>
+    </ul>
+
+    <h2>
+        <a id='issues'>Issues Discovered</a>
+    </h2>
+    <ul>
+        <li>
+            <ul class='issue_sections'>
+                <li>
+                    <p>
+                    <span class='issue'>Issue</span>: Database Injection
+                    </p>
+                </li>
+                <li>
+                    <p> <span class='issue'>Description</span>: Database
+                    injection via a query string in the form <span
+                        class='route'>username[$ne]=username</span> causes all
+                    scores for people whose usernames are <span
+                        class='emphasis'>not</span> <span
+                        class='query_string'>username</span> to be dumped. </p>
+
+                    <p><span class='route'>GET /scores.json</span> does not
+                    sanitize the query strings it accepts, allowing potentially
+                    malicious query strings into the database driver.</p>
+                </li>
+
+                <li>
+                    <p><span class='issue'>Location</span>: Database injection
+                    is possible along the <span class='route'>GET
+                        /scores.json</span> route</p>
+                </li>
+
+                <li>
+                    <p> <span class='issue'>Severity</span>: Medium </p>
+
+                    <p> Since there is no sensitive data stored in the database
+                    at the moment, and the vulnerability does not extend to
+                    arbitrary code execution or arbitrary database operations,
+                    attackers are limited in what they can obtain through this
+                    vulnerability. </p>
+
+                    <p> However, this vulnerability still represents a failure
+                    to keep user data secure and a failure to keep usernames
+                    private. </p>
+                </li>
+
+                <li>
+                    <p> <span class='issue'>Suggested Resolution</span>:
+                    Sanitize query strings to remove or escape character
+                    sequences known to change the intent/behavior of the
+                    database query. For example, the <span
+                        class='query_string'>username</span> field should not
+                    contain <span class='query_string'>[$ne]</span> in any
+                    form.</p>
+
+                    <p>
+                    Since it seems like most of the mongoDB operators are of the
+                    form <span class='code'>$XX</span>, it may be sufficient to
+                    simply run the username through something in the spirit of
+                    <span class='code'>username = username.replace(/\$/g,
+                        ''))</span> to remove all instances of <span
+                        class='code'>$</span>.</p>
+                </li>
+
+                <li>
+                    <img src='images/Database_Injection.png'
+                    alt='Image demonstrating a successful database injection attack'
+                    class='screencap'/>
+                </li>
+            </ul>
+        </li>
+
+        <li>
+            <ul class='issue_sections'>
+                <li>
+                    <p> <span class='issue'>Issue</span>: XSS attacks are
+                    possible. </p>
+                </li>
+
+                <li>
+                    <p> <span class='issue'>Description</span>: XSS
+                    vulnerabilities allow attackers to inject and run arbitrary
+                    code in the web application. For example by submitting the
+                    username <span class='query_string'>&lt;script&gt;
+                        window.alert("AAAAAAHHHHHHHHHHHHH");&lt;/script&gt;</span></p>
+                </li>
+
+                <li>
+                    <p>
+                    <span class='issue'>Location</span>: <span
+                        class='route'>GET /</span> is vulnerable to javascript
+                    injection.
+                    </p>
+                </li>
+
+                <li>
+                    <p> <span class='issue'>Severity</span>: High.</p>
+
+                    <p>This is an arbitrary code execution vulnerability.
+                    Anything goes. </p>
+                </li>
+
+                <li>
+                    <p>
+                    <span class='issue'>Suggested Resolution</span>: XSS
+                    attacks rely on user input being used to build content
+                    without proper sanitizing and filtering. It is difficult to
+                    protect yourself completely, but removing <span
+                        class='code'>&lt;script&gt;</span> tags is a good start.
+                    </p>
+                </li>
+
+                <li>
+                    <img src='images/JS_Injection.png' alt='Image demonstrating
+                    a successful javascript injection into a containingwebpage'
+                    class='screencap'/>
+                </li>
+
+            </ul>
+        </li>
+
+        <li>
+            <ul class='issue_sections'>
+                <li>
+                    <p>
+                    <span class='issue'>Issue</span>: Completeness of
+                    submission data not enforced
+                    </p>
+                </li>
+
+                <li>
+                    <p><span class='issue'>Description</span>: The application
+                    should only accept data from <span class='route'>POST
+                        /submit.json</span> if all three fields (username,
+                    score, grid) are present and correct. As is, the web
+                    application does not do this correctly.</p>
+
+                    <p>
+                    Specifically, the web application will accept any request
+                    that hits <span class='route'>POST /submit.json</span> and
+                    an entry will be created in the database, with as many
+                    empty fields as were missing from the request body.
+                    </p>
+                </li>
+
+                <li>
+                    <p>
+                    <span class='issue'>Location</span>: <span class='route'>GET
+                        /submit.json</span> does not properly check the
+                    integrity of the input it receives.
+                    </p>
+
+                    <p>
+                    The effects are visible when inspecting the output given by
+                    <span class='route'>GET /scores.json</span> with the
+                    appropriate query strings.
+                    </p>
+                </li>
+
+                <li>
+                    <p><span class='issue'>Severity</span>: Low</p>
+                    <p>Incomplete data should not be the end of the world, but
+                    it sure is annoying.</p>
+                </li>
+
+                <li>
+                    <p>
+                    <span class='issue'>Suggested Resolution</span>: Employ
+                    stricter integrity checks for the request body along <span
+                        class='route'>POST /submit.json</span>.
+                    </p>
+                </li>
+
+                <li>
+                    <img src='images/Incomplete_Data.png'
+                    alt='Screenshot demonstrating that the web application will
+                    insert incomplete entries into its database'
+                    class='screencap'/>
+                </li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2>
+        <a id='conclusion'>Conclusion</a>
+    </h2>
+
+    <p>
+    The web application <span class='applicationURI'> radiant-lake-20317
+    </span> has a number of security vulnerabilities, mostly stemming from a
+    lack of distrust for user input. The issues found here can, for the most
+    part, be mitigated by stricter checks on user input.
+    </p>
+
+    <p>
+    The maintainer may also consider avoiding <span
+        class='code'>res.header("Access-Control-Allow-Origin", "*");</span>, as
+    that makes it very easy for data to be submitted from anywhere, not just
+    the intended web application.
+    </p>
+
+    <p>
+    The maintainer may also consider removing the explicit mongodb uri from the
+    application source. Although this is not exposed to the client, it is one
+    more small thing to change when transplanting applications, e.g. when
+    testing locally.
+    </p>
+
+    <p>
+    Below, we provide an interesting client-side error that results from the
+    above issues but is not a new issue in and of itself.
+    </p>
+
+    <img src='images/Clientside_Error.png' alt='Screenshot demonstrating an
+    interesting error that arises when the web browser itself becomes
+    suspicious' class='screencap'/>
+</body>
+</html>
